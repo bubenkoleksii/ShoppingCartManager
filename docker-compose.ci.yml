@@ -4,12 +4,11 @@ services:
     container_name: db-sqlserver
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD
-      - MSSQL_USER
+      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
     ports:
       - "1433:1433"
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U $$MSSQL_USER -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" -b -o /dev/null
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourStrong!Passw0rd" -Q "SELECT 1" -b -o /dev/null
       interval: 10s
       timeout: 3s
       retries: 10

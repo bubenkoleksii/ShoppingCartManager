@@ -1,13 +1,10 @@
 name: Migrate
-
 on:
   workflow_call:
-
 jobs:
   migrate:
     name: Run DB Migrations
     runs-on: ubuntu-latest
-
     env:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -16,19 +13,16 @@ jobs:
       APPDATA: "/tmp"
       SQL_SERVER: localhost
       SQL_PORT: 1433
+      SQL_USER: sa
+      SQL_PASSWORD: YourStrong!Passw0rd
       SQL_DATABASE: ShoppingCartManagerDB
-      SQL_USER: ${{ secrets.SQL_USER }}
-      SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
-
       - name: Cache NuGet packages
         uses: actions/cache@v3
         with:
@@ -36,22 +30,15 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
-
       - name: Restore dependencies
         run: dotnet restore ./ShoppingCartManager.sln
-
       - name: Build
         run: dotnet build ./ShoppingCartManager.sln --configuration Release --no-restore
-
       - name: Start SQL Server
-        env:
-          MSSQL_SA_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-          MSSQL_USER: ${{ secrets.SQL_USER }}
         run: |
           cd ${{ github.workspace }}
           docker compose -f docker-compose.ci.yml up -d db-sqlserver
           sleep 60
-
       - name: Wait for SQL Server to be ready
         run: |
           for i in {1..30}; do
@@ -62,37 +49,31 @@ jobs:
             echo "Waiting for SQL Server to be ready..."
             sleep 10
           done
-
-      - name: Create SQL Server database if it doesn't exist
+      - name: Create SQL Server database using .NET
         run: |
-          mkdir -p CreateDatabaseApp
+          dotnet new console -n CreateDatabaseApp --force
           cd CreateDatabaseApp
-          dotnet new console --force
           dotnet add package Microsoft.Data.SqlClient
           echo 'using Microsoft.Data.SqlClient;' > Program.cs
           echo 'class Program {' >> Program.cs
           echo '    static void Main() {' >> Program.cs
-          echo "        var connectionString = \"Server=localhost,1433;User Id=$$({{ secrets.SQL_USER }});Password=$$({{ secrets.SQL_PASSWORD }});Encrypt=false;TrustServerCertificate=true;\";" >> Program.cs
+          echo '        var connectionString = "Server=localhost,1433;User Id=sa;Password=YourStrong!Passw0rd;Encrypt=false;TrustServerCertificate=true;";' >> Program.cs
           echo '        using (var connection = new SqlConnection(connectionString)) {' >> Program.cs
-          echo "            connection.Open();" >> Program.cs
-          echo "            var command = new SqlCommand(\"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '$$({{ env.SQL_DATABASE }}))' CREATE DATABASE [$$({{ env.SQL_DATABASE }});\", connection);" >> Program.cs
+          echo '            connection.Open();' >> Program.cs
+          echo "            var command = new SqlCommand(\"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '${{ env.SQL_DATABASE }}') CREATE DATABASE [${{ env.SQL_DATABASE }}];\", connection);" >> Program.cs
           echo '            command.ExecuteNonQuery();' >> Program.cs
           echo '        }' >> Program.cs
           echo '    }' >> Program.cs
           echo '}' >> Program.cs
           dotnet run
-
       - name: Install FluentMigrator CLI
         run: dotnet tool install --global FluentMigrator.DotNet.Cli
-
       - name: Apply migrations
         run: |
-          CONNECTION_STRING="Server=${{ env.SQL_SERVER }},${{ env.SQL_PORT }};Database=${{ env.SQL_DATABASE }};User Id=${{ secrets.SQL_USER }};Password=${{ secrets.SQL_PASSWORD }};Encrypt=false;TrustServerCertificate=true;"
           dotnet fm migrate \
             -a ./src/ShoppingCartManager.Persistence/bin/Release/net9.0/ShoppingCartManager.Persistence.dll \
             -p sqlserver \
-            -c "$CONNECTION_STRING"
-
+            -c "Server=${{ env.SQL_SERVER }},${{ env.SQL_PORT }};Database=${{ env.SQL_DATABASE }};User Id=${{ env.SQL_USER }};Password=${{ env.SQL_PASSWORD }};Encrypt=false;TrustServerCertificate=true"
       - name: Stop SQL Server
         if: always()
         run: |
