@@ -148,7 +148,7 @@ public class StatisticsServiceTests
 
         _productQueries.Verify(p => p.GetStats(_userId, from, to, It.IsAny<CancellationToken>()), Times.Once);
         _categoryQueries.Verify(c => c.Get(_userId, It.IsAny<CancellationToken>()), Times.Once);
-        _storeQueries.Verify(s => s.Get(_userId, It.IsAny<CancellationToken>()), Times.Once);
+        _storeQueries.Verify(s => s.Get(_userId, It.IsAny<CancellationToken>()), Times.Never);
         _cacheProvider.Verify(c => c.GetOrAddAsync(
             It.IsAny<string>(),
             It.IsAny<Func<Task<StatisticsResponse>>>(),
