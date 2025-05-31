@@ -62,25 +62,20 @@ jobs:
 
       - name: Create SQL Server database using .NET
         run: |
-          mkdir CreateDatabaseApp
+          dotnet new console -n CreateDatabaseApp --force
           cd CreateDatabaseApp
-          dotnet new console --force
           dotnet add package Microsoft.Data.SqlClient
-          cat << EOF > Program.cs
-using Microsoft.Data.SqlClient;
-
-class Program
-{
-    static void Main()
-    {
-        var connectionString = "Server=localhost,1433;User Id=sa;Password=YourStrong!Passw0rd;Encrypt=false;TrustServerCertificate=true;";
-        using var connection = new SqlConnection(connectionString);
-        connection.Open();
-        var command = new SqlCommand("IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '${{ env.SQL_DATABASE }}') CREATE DATABASE [${{ env.SQL_DATABASE }}];", connection);
-        command.ExecuteNonQuery();
-    }
-}
-EOF
+          echo 'using Microsoft.Data.SqlClient;' > Program.cs
+          echo 'class Program {' >> Program.cs
+          echo '    static void Main() {' >> Program.cs
+          echo '        var connectionString = "Server=localhost,1433;User Id=sa;Password=YourStrong!Passw0rd;Encrypt=false;TrustServerCertificate=true;";' >> Program.cs
+          echo '        using (var connection = new SqlConnection(connectionString)) {' >> Program.cs
+          echo '            connection.Open();' >> Program.cs
+          echo "            var command = new SqlCommand(\"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '${{ env.SQL_DATABASE }}') CREATE DATABASE [${{ env.SQL_DATABASE }}];\", connection);" >> Program.cs
+          echo '            command.ExecuteNonQuery();' >> Program.cs
+          echo '        }' >> Program.cs
+          echo '    }' >> Program.cs
+          echo '}' >> Program.cs
           dotnet run
 
       - name: Install FluentMigrator CLI
