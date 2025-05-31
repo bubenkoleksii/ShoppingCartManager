@@ -13,7 +13,8 @@ public sealed class StoreDbModel : DbModelBase<Store>
 
     public StoreDbModel() { }
 
-    public StoreDbModel(Store store) : base(store) { }
+    public StoreDbModel(Store store)
+        : base(store) { }
 
     protected override void MapFromDomainEntityCore(Store store)
     {
@@ -27,6 +28,6 @@ public sealed class StoreDbModel : DbModelBase<Store>
         {
             UserId = UserId,
             Name = Name,
-            Color = Color
+            Color = Color,
         };
 }

@@ -15,7 +15,10 @@ public sealed class StoreService(
     ILogger<StoreService> logger
 ) : IStoreService
 {
-    public async Task<Either<Error, Store>> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, Store>> GetById(
+        Guid id,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation("[StoreService] Attempting to get store by ID: {StoreId}", id);
 
@@ -25,14 +28,17 @@ public sealed class StoreService(
 
         var option = await storeQueries.GetById(userId.Value, id, cancellationToken);
 
-        return option.ToEither<Error>(new StoreNotFoundError(id)).Do(_ =>
-        {
-            logger.LogInformation("[StoreService] Store with ID {StoreId} found", id);
-        }).MapLeft(error =>
-        {
-            logger.LogWarning("[StoreService] Store with ID {StoreId} not found", id);
-            return error;
-        });
+        return option
+            .ToEither<Error>(new StoreNotFoundError(id))
+            .Do(_ =>
+            {
+                logger.LogInformation("[StoreService] Store with ID {StoreId} found", id);
+            })
+            .MapLeft(error =>
+            {
+                logger.LogWarning("[StoreService] Store with ID {StoreId} not found", id);
+                return error;
+            });
     }
 
     public async Task<IEnumerable<Store>> GetAll(CancellationToken cancellationToken = default)
@@ -47,7 +53,10 @@ public sealed class StoreService(
         return result;
     }
 
-    public async Task<Either<Error, Store>> Create(CreateStoreRequest request, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, Store>> Create(
+        CreateStoreRequest request,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation("[StoreService] Creating store with name '{Name}'", request.Name);
 
@@ -59,7 +68,7 @@ public sealed class StoreService(
         {
             UserId = userId.Value,
             Name = request.Name,
-            Color = request.Color
+            Color = request.Color,
         };
 
         var result = await storeCommands.Add(store, cancellationToken);
@@ -67,17 +76,29 @@ public sealed class StoreService(
         return result.Match<Either<Error, Store>>(
             Right: added =>
             {
-                logger.LogInformation("[StoreService] Store created with ID {StoreId} for user {UserId}", added.Id, added.UserId);
+                logger.LogInformation(
+                    "[StoreService] Store created with ID {StoreId} for user {UserId}",
+                    added.Id,
+                    added.UserId
+                );
                 return added;
             },
             Left: error =>
             {
-                logger.LogError("[StoreService] Failed to create store for user {UserId}: {Error}", userId, error);
+                logger.LogError(
+                    "[StoreService] Failed to create store for user {UserId}: {Error}",
+                    userId,
+                    error
+                );
                 return error;
-            });
+            }
+        );
     }
 
-    public async Task<Either<Error, Store>> Update(UpdateStoreRequest request, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, Store>> Update(
+        UpdateStoreRequest request,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation("[StoreService] Updating store with ID {StoreId}", request.Id);
 
@@ -88,7 +109,10 @@ public sealed class StoreService(
         var existing = await storeQueries.GetById(userId.Value, request.Id, cancellationToken);
         if (existing.IsNone)
         {
-            logger.LogWarning("[StoreService] Store with ID {StoreId} not found for update", request.Id);
+            logger.LogWarning(
+                "[StoreService] Store with ID {StoreId} not found for update",
+                request.Id
+            );
             return new StoreNotFoundError(request.Id);
         }
 
@@ -101,14 +125,22 @@ public sealed class StoreService(
         return result.Match<Either<Error, Store>>(
             Right: updated =>
             {
-                logger.LogInformation("[StoreService] Store with ID {StoreId} successfully updated", updated.Id);
+                logger.LogInformation(
+                    "[StoreService] Store with ID {StoreId} successfully updated",
+                    updated.Id
+                );
                 return updated;
             },
             Left: error =>
             {
-                logger.LogError("[StoreService] Failed to update store with ID {StoreId}: {Error}", store.Id, error);
+                logger.LogError(
+                    "[StoreService] Failed to update store with ID {StoreId}: {Error}",
+                    store.Id,
+                    error
+                );
                 return error;
-            });
+            }
+        );
     }
 
     public async Task<Option<Error>> Delete(Guid id, CancellationToken cancellationToken = default)
@@ -123,7 +155,10 @@ public sealed class StoreService(
 
         if (result.IsNone)
         {
-            logger.LogInformation("[StoreService] Store with ID {StoreId} deleted successfully", id);
+            logger.LogInformation(
+                "[StoreService] Store with ID {StoreId} deleted successfully",
+                id
+            );
         }
         else
         {

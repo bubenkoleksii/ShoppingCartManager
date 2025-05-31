@@ -20,9 +20,15 @@ public class AuthService(
     IEnumerable<IOnUserAddedHandler> userAddedHandlers
 ) : IAuthService
 {
-    public async Task<Either<Error, AuthResult>> Register(RegisterUserRequest userRequest, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, AuthResult>> Register(
+        RegisterUserRequest userRequest,
+        CancellationToken cancellationToken = default
+    )
     {
-        var emailAlreadyExists = await userQueries.EmailExists(userRequest.Email, cancellationToken);
+        var emailAlreadyExists = await userQueries.EmailExists(
+            userRequest.Email,
+            cancellationToken
+        );
         if (emailAlreadyExists)
             return new EmailAlreadyExistsError(userRequest.Email);
 
@@ -33,33 +39,41 @@ public class AuthService(
             FullName = userRequest.FullName,
             Email = userRequest.Email,
             PasswordHash = passwordHash,
-            PasswordSalt = passwordSalt
+            PasswordSalt = passwordSalt,
         };
 
         var addUserResult = await userCommands.Add(newUser, cancellationToken);
 
-        return await addUserResult.MatchAsync(async addedUser =>
-        {
-            var accessToken = jwtTokenGenerator.GenerateToken(addedUser);
-            var refreshToken = refreshTokenGenerator.Generate(addedUser.Id);
-
-            logger.LogInformation("Register: Generated refresh token for user {UserId}", addedUser.Id);
-
-            var saveError = await refreshTokenCommands.Add(refreshToken, cancellationToken);
-            if (saveError.IsSome)
-                return saveError.First();
-
-            foreach (var handler in userAddedHandlers)
+        return await addUserResult.MatchAsync(
+            async addedUser =>
             {
-                await handler.Handle(addedUser.Id, cancellationToken);
-            }
+                var accessToken = jwtTokenGenerator.GenerateToken(addedUser);
+                var refreshToken = refreshTokenGenerator.Generate(addedUser.Id);
 
-            return new AuthResult(addedUser, accessToken, refreshToken.Token);
-        },
-        error => Task.FromResult<Either<Error, AuthResult>>(error));
+                logger.LogInformation(
+                    "Register: Generated refresh token for user {UserId}",
+                    addedUser.Id
+                );
+
+                var saveError = await refreshTokenCommands.Add(refreshToken, cancellationToken);
+                if (saveError.IsSome)
+                    return saveError.First();
+
+                foreach (var handler in userAddedHandlers)
+                {
+                    await handler.Handle(addedUser.Id, cancellationToken);
+                }
+
+                return new AuthResult(addedUser, accessToken, refreshToken.Token);
+            },
+            error => Task.FromResult<Either<Error, AuthResult>>(error)
+        );
     }
 
-    public async Task<Either<Error, AuthResult>> Login(LoginRequest loginRequest, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, AuthResult>> Login(
+        LoginRequest loginRequest,
+        CancellationToken cancellationToken = default
+    )
     {
         var userOption = await userQueries.GetByEmail(loginRequest.Email, cancellationToken);
 
@@ -90,37 +104,58 @@ public class AuthService(
         );
     }
 
-    public async Task<Either<Error, AuthResult>> RefreshToken(string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, AuthResult>> RefreshToken(
+        string refreshToken,
+        CancellationToken cancellationToken = default
+    )
     {
-        var existingTokenOption = await refreshTokenQueries.GetByToken(refreshToken, cancellationToken);
+        var existingTokenOption = await refreshTokenQueries.GetByToken(
+            refreshToken,
+            cancellationToken
+        );
 
         return await existingTokenOption.MatchAsync(
             Some: async existingToken =>
             {
                 if (!existingToken.IsActive)
                 {
-                    logger.LogWarning("Refresh token is expired or revoked: {RefreshToken}", "[hidden]");
+                    logger.LogWarning(
+                        "Refresh token is expired or revoked: {RefreshToken}",
+                        "[hidden]"
+                    );
                     return new InvalidRefreshTokenError();
                 }
 
                 var userIdFromContext = userContext.UserId;
-                if (userIdFromContext is not { } currentUserId || currentUserId != existingToken.UserId)
+                if (
+                    userIdFromContext is not { } currentUserId
+                    || currentUserId != existingToken.UserId
+                )
                 {
-                    logger.LogWarning("User {UserId} tried to refresh token not belonging to them", userIdFromContext);
+                    logger.LogWarning(
+                        "User {UserId} tried to refresh token not belonging to them",
+                        userIdFromContext
+                    );
                     return new InvalidRefreshTokenError();
                 }
 
                 var userOption = await userQueries.GetById(existingToken.UserId, cancellationToken);
                 if (userOption.IsNone)
                 {
-                    logger.LogWarning("Refresh token used for unknown user: {UserId}", existingToken.UserId);
+                    logger.LogWarning(
+                        "Refresh token used for unknown user: {UserId}",
+                        existingToken.UserId
+                    );
                     return new InvalidRefreshTokenError();
                 }
 
                 var user = userOption.First();
                 var newRefreshToken = refreshTokenGenerator.Generate(user.Id);
 
-                var revokeError = await refreshTokenCommands.Revoke(refreshToken, cancellationToken);
+                var revokeError = await refreshTokenCommands.Revoke(
+                    refreshToken,
+                    cancellationToken
+                );
                 if (revokeError.IsSome)
                     return revokeError.First();
 
@@ -128,7 +163,11 @@ public class AuthService(
                 if (saveError.IsSome)
                     return saveError.First();
 
-                var replaceError = await refreshTokenCommands.MarkReplacedBy(refreshToken, newRefreshToken.Token, cancellationToken);
+                var replaceError = await refreshTokenCommands.MarkReplacedBy(
+                    refreshToken,
+                    newRefreshToken.Token,
+                    cancellationToken
+                );
                 if (replaceError.IsSome)
                     return replaceError.First();
 

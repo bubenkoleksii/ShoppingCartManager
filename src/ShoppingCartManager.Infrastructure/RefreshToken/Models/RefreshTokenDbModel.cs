@@ -34,6 +34,6 @@ public sealed class RefreshTokenDbModel : DbModelBase<RefreshToken>
             Token = Token,
             ExpiresAt = ExpiresAt,
             RevokedAt = RevokedAt,
-            ReplacedByToken = ReplacedByToken
+            ReplacedByToken = ReplacedByToken,
         };
 }

@@ -8,7 +8,8 @@ public sealed class ProductBreakdownItem(
     Guid categoryId,
     string categoryName,
     Guid? storeId,
-    string? storeName)
+    string? storeName
+)
 {
     public Guid ProductId { get; init; } = productId;
     public string ProductName { get; init; } = productName;

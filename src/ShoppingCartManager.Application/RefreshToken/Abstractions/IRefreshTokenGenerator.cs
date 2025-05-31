@@ -1,6 +1,6 @@
 ﻿namespace ShoppingCartManager.Application.RefreshToken.Abstractions;
 
-using RefreshToken= Domain.Entities.RefreshToken;
+using RefreshToken = Domain.Entities.RefreshToken;
 
 public interface IRefreshTokenGenerator
 {

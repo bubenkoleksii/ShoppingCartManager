@@ -44,10 +44,7 @@ public static class DapperExtensions
         var conditions = string.Join(" AND ", where.Keys.Select(k => $"[{k}] = @{k}"));
         var sql = $"SELECT * FROM [{tableName}] WHERE {conditions}";
 
-        var result = await connection.QueryAsync<T>(
-            sql,
-            where.ToDynamicParameters()
-        );
+        var result = await connection.QueryAsync<T>(sql, where.ToDynamicParameters());
 
         return result;
     }
@@ -65,11 +62,7 @@ public static class DapperExtensions
         return result;
     }
 
-    public static async Task<bool> Add<T>(
-        this IDbConnection connection,
-        string tableName,
-        T entity
-    )
+    public static async Task<bool> Add<T>(this IDbConnection connection, string tableName, T entity)
     {
         var properties = typeof(T).GetProperties().ToList();
 
@@ -117,20 +110,21 @@ public static class DapperExtensions
         Dictionary<string, object> where,
         string orderBy,
         int skip,
-        int take)
+        int take
+    )
     {
         var conditions = string.Join(" AND ", where.Keys.Select(k => $"[{k}] = @{k}"));
         var sql = $"""
-                   
-                           SELECT * FROM [{tableName}]
-                           WHERE {conditions}
-                           ORDER BY {orderBy}
-                           OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY;
-                   
-                           SELECT COUNT(*) FROM [{tableName}]
-                           WHERE {conditions};
-                       
-                   """;
+
+                    SELECT * FROM [{tableName}]
+                    WHERE {conditions}
+                    ORDER BY {orderBy}
+                    OFFSET @Skip ROWS FETCH NEXT @Take ROWS ONLY;
+
+                    SELECT COUNT(*) FROM [{tableName}]
+                    WHERE {conditions};
+                
+            """;
 
         var parameters = where.ToDynamicParameters();
         parameters.Add("Skip", skip);
@@ -143,7 +137,6 @@ public static class DapperExtensions
 
         return (results, total);
     }
-
 
     private static DynamicParameters ToDynamicParameters(this Dictionary<string, object> dict)
     {

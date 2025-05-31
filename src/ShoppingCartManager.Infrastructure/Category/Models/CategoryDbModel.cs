@@ -28,6 +28,6 @@ public sealed class CategoryDbModel : DbModelBase<Category>
         {
             UserId = UserId,
             Name = Name,
-            IconId = IconId
+            IconId = IconId,
         };
 }

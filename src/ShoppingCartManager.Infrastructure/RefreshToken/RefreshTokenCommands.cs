@@ -11,7 +11,10 @@ public sealed class RefreshTokenCommands(
     ILogger<RefreshTokenCommands> logger
 ) : IRefreshTokenCommands
 {
-    public async Task<Option<Error>> Add(RefreshToken refreshToken, CancellationToken cancellationToken = default)
+    public async Task<Option<Error>> Add(
+        RefreshToken refreshToken,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -23,26 +26,29 @@ public sealed class RefreshTokenCommands(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to add refresh token for user {UserId}", refreshToken.UserId);
+            logger.LogError(
+                ex,
+                "Failed to add refresh token for user {UserId}",
+                refreshToken.UserId
+            );
             return new RefreshTokenCreateFailed();
         }
     }
 
-    public async Task<Option<Error>> Revoke(string token, CancellationToken cancellationToken = default)
+    public async Task<Option<Error>> Revoke(
+        string token,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
             const string sql = $"""
-                UPDATE [{RefreshTokenDbModel.TableName}]
-                SET [RevokedAt] = @RevokedAt
-                WHERE [Token] = @Token
-            """;
+                    UPDATE [{RefreshTokenDbModel.TableName}]
+                    SET [RevokedAt] = @RevokedAt
+                    WHERE [Token] = @Token
+                """;
 
-            await connection.ExecuteAsync(sql, new
-            {
-                Token = token,
-                RevokedAt = DateTime.UtcNow
-            });
+            await connection.ExecuteAsync(sql, new { Token = token, RevokedAt = DateTime.UtcNow });
 
             return Option<Error>.None;
         }
@@ -53,21 +59,21 @@ public sealed class RefreshTokenCommands(
         }
     }
 
-    public async Task<Option<Error>> MarkReplacedBy(string oldToken, string newToken, CancellationToken cancellationToken = default)
+    public async Task<Option<Error>> MarkReplacedBy(
+        string oldToken,
+        string newToken,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
             const string sql = $"""
-                UPDATE [{RefreshTokenDbModel.TableName}]
-                SET [ReplacedByToken] = @NewToken
-                WHERE [Token] = @OldToken
-            """;
+                    UPDATE [{RefreshTokenDbModel.TableName}]
+                    SET [ReplacedByToken] = @NewToken
+                    WHERE [Token] = @OldToken
+                """;
 
-            await connection.ExecuteAsync(sql, new
-            {
-                OldToken = oldToken,
-                NewToken = newToken
-            });
+            await connection.ExecuteAsync(sql, new { OldToken = oldToken, NewToken = newToken });
 
             return Option<Error>.None;
         }

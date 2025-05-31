@@ -7,14 +7,18 @@ using Store = Domain.Entities.Store;
 
 public sealed class StoreQueries(IDbConnection connection) : IStoreQueries
 {
-    public async Task<Option<Store>> GetById(Guid userId, Guid storeId, CancellationToken cancellationToken = default)
+    public async Task<Option<Store>> GetById(
+        Guid userId,
+        Guid storeId,
+        CancellationToken cancellationToken = default
+    )
     {
         var dbStoreOption = await connection.GetSingleWhere<StoreDbModel>(
             StoreDbModel.TableName,
             new Dictionary<string, object>
             {
                 [nameof(StoreDbModel.Id)] = storeId,
-                [nameof(StoreDbModel.UserId)] = userId
+                [nameof(StoreDbModel.UserId)] = userId,
             }
         );
 
@@ -24,14 +28,14 @@ public sealed class StoreQueries(IDbConnection connection) : IStoreQueries
         );
     }
 
-    public async Task<IEnumerable<Store>> Get(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Store>> Get(
+        Guid userId,
+        CancellationToken cancellationToken = default
+    )
     {
         var dbStores = await connection.GetAllWhere<StoreDbModel>(
             StoreDbModel.TableName,
-            new Dictionary<string, object>
-            {
-                [nameof(StoreDbModel.UserId)] = userId
-            }
+            new Dictionary<string, object> { [nameof(StoreDbModel.UserId)] = userId }
         );
 
         return dbStores.Select(db => db.ToDomainEntity());

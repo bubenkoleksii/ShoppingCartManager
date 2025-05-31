@@ -8,7 +8,10 @@ using Store = Domain.Entities.Store;
 
 public sealed class StoreCommands(IDbConnection connection) : IStoreCommands
 {
-    public async Task<Either<Error, Store>> Add(Store store, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, Store>> Add(
+        Store store,
+        CancellationToken cancellationToken = default
+    )
     {
         var model = new StoreDbModel(store);
 
@@ -35,7 +38,10 @@ public sealed class StoreCommands(IDbConnection connection) : IStoreCommands
         );
     }
 
-    public async Task<Either<Error, Store>> Update(Store store, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, Store>> Update(
+        Store store,
+        CancellationToken cancellationToken = default
+    )
     {
         var existingOption = await connection.GetSingleBy<StoreDbModel>(
             StoreDbModel.TableName,
@@ -71,7 +77,11 @@ public sealed class StoreCommands(IDbConnection connection) : IStoreCommands
         );
     }
 
-    public async Task<Option<Error>> Delete(Guid storeId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Option<Error>> Delete(
+        Guid storeId,
+        Guid userId,
+        CancellationToken cancellationToken = default
+    )
     {
         var existingOption = await connection.GetSingleBy<StoreDbModel>(
             StoreDbModel.TableName,
@@ -85,9 +95,7 @@ public sealed class StoreCommands(IDbConnection connection) : IStoreCommands
         try
         {
             var deleted = await connection.DeleteById(StoreDbModel.TableName, storeId);
-            return deleted
-                ? Option<Error>.None
-                : new StoreDeleteFailed(userId, storeId);
+            return deleted ? Option<Error>.None : new StoreDeleteFailed(userId, storeId);
         }
         catch
         {

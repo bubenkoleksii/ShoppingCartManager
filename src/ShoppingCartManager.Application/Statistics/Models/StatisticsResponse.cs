@@ -6,7 +6,8 @@ public sealed class StatisticsResponse(
     int totalProducts,
     int productsInCart,
     IEnumerable<CategoryBreakdownItem> categoryBreakdown,
-    IEnumerable<ProductBreakdownItem> productBreakdown)
+    IEnumerable<ProductBreakdownItem> productBreakdown
+)
 {
     public DateTime From { get; init; } = from;
     public DateTime To { get; init; } = to;

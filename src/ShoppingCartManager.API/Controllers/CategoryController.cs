@@ -32,7 +32,10 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
     [HttpPost]
     [ProducesResponseType(typeof(CategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateCategoryRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var result = await categoryService.Create(request, cancellationToken);
 
@@ -45,7 +48,10 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
     [HttpPut]
     [ProducesResponseType(typeof(CategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Update([FromBody] UpdateCategoryRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(
+        [FromBody] UpdateCategoryRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var result = await categoryService.Update(request, cancellationToken);
 
@@ -61,9 +67,6 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
     {
         var result = await categoryService.Delete(id, cancellationToken);
 
-        return result.Match(
-            None: NoContent,
-            Some: ErrorActionResultHandler.Handle
-        );
+        return result.Match(None: NoContent, Some: ErrorActionResultHandler.Handle);
     }
 }

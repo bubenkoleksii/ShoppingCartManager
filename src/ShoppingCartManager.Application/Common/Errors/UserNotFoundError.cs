@@ -8,10 +8,7 @@ public sealed record UserNotFoundError : ApiError
 
     public override string DefaultErrorMessage => "User not found";
 
-    public UserNotFoundError()
-    {
-
-    }
+    public UserNotFoundError() { }
 
     public UserNotFoundError(Guid userId)
     {

@@ -7,10 +7,19 @@ public sealed class AddShoppingCartDataToProduct : MigrationTemplate
 
     protected override void ApplyUp()
     {
-        Alter.Table(TableName)
-            .AddColumn(nameof(Product.IsInCart)).AsBoolean().NotNullable().WithDefaultValue(false)
-            .AddColumn(nameof(Product.InCartAt)).AsDateTime().Nullable()
-            .AddColumn(nameof(Product.Price)).AsDecimal().NotNullable().WithDefaultValue(0);
+        Alter
+            .Table(TableName)
+            .AddColumn(nameof(Product.IsInCart))
+            .AsBoolean()
+            .NotNullable()
+            .WithDefaultValue(false)
+            .AddColumn(nameof(Product.InCartAt))
+            .AsDateTime()
+            .Nullable()
+            .AddColumn(nameof(Product.Price))
+            .AsDecimal()
+            .NotNullable()
+            .WithDefaultValue(0);
     }
 
     protected override void ApplyDown()

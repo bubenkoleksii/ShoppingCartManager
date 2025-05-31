@@ -51,7 +51,8 @@ public class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh(
         [FromBody] RefreshTokenRequest request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var result = await authService.RefreshToken(request.RefreshToken, cancellationToken);
 

@@ -14,7 +14,8 @@ public sealed class StatisticsController(IStatisticsService statisticsService) :
     public async Task<IActionResult> Get(
         [FromQuery] DateTime from,
         [FromQuery] DateTime to,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var result = await statisticsService.GetStatistics(from, to, cancellationToken);
 

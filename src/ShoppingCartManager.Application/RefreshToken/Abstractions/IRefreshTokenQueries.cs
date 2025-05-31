@@ -4,5 +4,8 @@ using RefreshToken = Domain.Entities.RefreshToken;
 
 public interface IRefreshTokenQueries
 {
-    Task<Option<RefreshToken>> GetByToken(string token, CancellationToken cancellationToken = default);
+    Task<Option<RefreshToken>> GetByToken(
+        string token,
+        CancellationToken cancellationToken = default
+    );
 }

@@ -32,7 +32,12 @@ public class AuthServiceTests
 
     public AuthServiceTests()
     {
-        _testUser = new User { Id = _userId, FullName = "Test User", Email = "test@example.com" };
+        _testUser = new User
+        {
+            Id = _userId,
+            FullName = "Test User",
+            Email = "test@example.com",
+        };
         _service = new AuthService(
             _userCommands.Object,
             _userQueries.Object,
@@ -50,10 +55,19 @@ public class AuthServiceTests
     public async Task Register_ReturnsError_WhenEmailExists()
     {
         // Arrange
-        _userQueries.Setup(x => x.EmailExists(_testUser.Email, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _userQueries
+            .Setup(x => x.EmailExists(_testUser.Email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         // Act
-        var result = await _service.Register(new RegisterUserRequest { Email = _testUser.Email, FullName = _testUser.FullName!, Password = "testPassword06" });
+        var result = await _service.Register(
+            new RegisterUserRequest
+            {
+                Email = _testUser.Email,
+                FullName = _testUser.FullName!,
+                Password = "testPassword06",
+            }
+        );
 
         // Assert
         Assert.True(result.IsLeft);
@@ -64,14 +78,31 @@ public class AuthServiceTests
     public async Task Register_ReturnsAuthResult_WhenSuccess()
     {
         // Arrange
-        _userQueries.Setup(x => x.EmailExists(_testUser.Email, It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        _userCommands.Setup(x => x.Add(It.IsAny<User>(), It.IsAny<CancellationToken>())).ReturnsAsync(Right<Error, User>(_testUser));
-        _refreshTokenGenerator.Setup(x => x.Generate(_userId)).Returns(new Domain.Entities.RefreshToken { Token = _refresh, UserId = _userId });
-        _refreshTokenCommands.Setup(x => x.Add(It.IsAny<Domain.Entities.RefreshToken>(), It.IsAny<CancellationToken>())).ReturnsAsync(Option<Error>.None);
+        _userQueries
+            .Setup(x => x.EmailExists(_testUser.Email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        _userCommands
+            .Setup(x => x.Add(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Right<Error, User>(_testUser));
+        _refreshTokenGenerator
+            .Setup(x => x.Generate(_userId))
+            .Returns(new Domain.Entities.RefreshToken { Token = _refresh, UserId = _userId });
+        _refreshTokenCommands
+            .Setup(x =>
+                x.Add(It.IsAny<Domain.Entities.RefreshToken>(), It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(Option<Error>.None);
         _jwtTokenGenerator.Setup(x => x.GenerateToken(_testUser)).Returns(_token);
 
         // Act
-        var result = await _service.Register(new RegisterUserRequest { FullName = _testUser.FullName!, Email = _testUser.Email, Password = _password });
+        var result = await _service.Register(
+            new RegisterUserRequest
+            {
+                FullName = _testUser.FullName!,
+                Email = _testUser.Email,
+                Password = _password,
+            }
+        );
 
         // Assert
         Assert.True(result.IsRight);
@@ -83,10 +114,14 @@ public class AuthServiceTests
     public async Task Login_ReturnsError_WhenUserNotFound()
     {
         // Arrange
-        _userQueries.Setup(x => x.GetByEmail(_testUser.Email, It.IsAny<CancellationToken>())).ReturnsAsync(Option<User>.None);
+        _userQueries
+            .Setup(x => x.GetByEmail(_testUser.Email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Option<User>.None);
 
         // Act
-        var result = await _service.Login(new LoginRequest { Email = _testUser.Email, Password = _password });
+        var result = await _service.Login(
+            new LoginRequest { Email = _testUser.Email, Password = _password }
+        );
 
         // Assert
         Assert.True(result.IsLeft);
@@ -97,10 +132,14 @@ public class AuthServiceTests
     public async Task Login_ReturnsError_WhenPasswordInvalid()
     {
         // Arrange
-        _userQueries.Setup(x => x.GetByEmail(_testUser.Email, It.IsAny<CancellationToken>())).ReturnsAsync(Some(_testUser));
+        _userQueries
+            .Setup(x => x.GetByEmail(_testUser.Email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Some(_testUser));
 
         // Act
-        var result = await _service.Login(new LoginRequest { Email = _testUser.Email, Password = "wrong" });
+        var result = await _service.Login(
+            new LoginRequest { Email = _testUser.Email, Password = "wrong" }
+        );
 
         // Assert
         Assert.True(result.IsLeft);

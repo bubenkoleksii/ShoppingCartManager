@@ -22,16 +22,29 @@ public class StoreServiceTests
 
     public StoreServiceTests()
     {
-        _testStore = new Store { Id = _storeId, UserId = _userId, Name = "Test Store", Color = "#ffffff" };
+        _testStore = new Store
+        {
+            Id = _storeId,
+            UserId = _userId,
+            Name = "Test Store",
+            Color = "#ffffff",
+        };
         _context.Setup(c => c.UserId).Returns(_userId);
-        _service = new StoreService(_queries.Object, _commands.Object, _context.Object, _logger.Object);
+        _service = new StoreService(
+            _queries.Object,
+            _commands.Object,
+            _context.Object,
+            _logger.Object
+        );
     }
 
     [Fact]
     public async Task GetById_ReturnsStore_WhenExists()
     {
         // Arrange
-        _queries.Setup(q => q.GetById(_userId, _storeId, CancellationToken.None)).ReturnsAsync(Some(_testStore));
+        _queries
+            .Setup(q => q.GetById(_userId, _storeId, CancellationToken.None))
+            .ReturnsAsync(Some(_testStore));
 
         // Act
         var result = await _service.GetById(_storeId);
@@ -45,7 +58,9 @@ public class StoreServiceTests
     public async Task GetById_ReturnsError_WhenNotFound()
     {
         // Arrange
-        _queries.Setup(q => q.GetById(_userId, _storeId, CancellationToken.None)).ReturnsAsync(Option<Store>.None);
+        _queries
+            .Setup(q => q.GetById(_userId, _storeId, CancellationToken.None))
+            .ReturnsAsync(Option<Store>.None);
 
         // Act
         var result = await _service.GetById(_storeId);
@@ -102,9 +117,17 @@ public class StoreServiceTests
     {
         // Arrange
         var request = new CreateStoreRequest { Name = "New", Color = "#000000" };
-        var newStore = new Store { Id = Guid.NewGuid(), UserId = _userId, Name = request.Name, Color = request.Color };
+        var newStore = new Store
+        {
+            Id = Guid.NewGuid(),
+            UserId = _userId,
+            Name = request.Name,
+            Color = request.Color,
+        };
 
-        _commands.Setup(c => c.Add(It.IsAny<Store>(), CancellationToken.None)).ReturnsAsync(Right<Error, Store>(newStore));
+        _commands
+            .Setup(c => c.Add(It.IsAny<Store>(), CancellationToken.None))
+            .ReturnsAsync(Right<Error, Store>(newStore));
 
         // Act
         var result = await _service.Create(request);
@@ -133,8 +156,15 @@ public class StoreServiceTests
     public async Task Update_ReturnsError_WhenStoreNotFound()
     {
         // Arrange
-        var request = new UpdateStoreRequest { Id = _storeId, Name = "Updated", Color = "#222222" };
-        _queries.Setup(q => q.GetById(_userId, _storeId, CancellationToken.None)).ReturnsAsync(Option<Store>.None);
+        var request = new UpdateStoreRequest
+        {
+            Id = _storeId,
+            Name = "Updated",
+            Color = "#222222",
+        };
+        _queries
+            .Setup(q => q.GetById(_userId, _storeId, CancellationToken.None))
+            .ReturnsAsync(Option<Store>.None);
 
         // Act
         var result = await _service.Update(request);
@@ -148,9 +178,18 @@ public class StoreServiceTests
     public async Task Update_ReturnsUpdatedStore_WhenSuccess()
     {
         // Arrange
-        var request = new UpdateStoreRequest { Id = _storeId, Name = "Updated", Color = "#222222" };
-        _queries.Setup(q => q.GetById(_userId, _storeId, CancellationToken.None)).ReturnsAsync(Some(_testStore));
-        _commands.Setup(c => c.Update(It.IsAny<Store>(), CancellationToken.None)).ReturnsAsync(Right<Error, Store>(_testStore));
+        var request = new UpdateStoreRequest
+        {
+            Id = _storeId,
+            Name = "Updated",
+            Color = "#222222",
+        };
+        _queries
+            .Setup(q => q.GetById(_userId, _storeId, CancellationToken.None))
+            .ReturnsAsync(Some(_testStore));
+        _commands
+            .Setup(c => c.Update(It.IsAny<Store>(), CancellationToken.None))
+            .ReturnsAsync(Right<Error, Store>(_testStore));
 
         // Act
         var result = await _service.Update(request);
@@ -164,7 +203,9 @@ public class StoreServiceTests
     public async Task Delete_ReturnsNone_WhenSuccess()
     {
         // Arrange
-        _commands.Setup(c => c.Delete(_storeId, _userId, CancellationToken.None)).ReturnsAsync(Option<Error>.None);
+        _commands
+            .Setup(c => c.Delete(_storeId, _userId, CancellationToken.None))
+            .ReturnsAsync(Option<Error>.None);
 
         // Act
         var result = await _service.Delete(_storeId);
@@ -177,7 +218,9 @@ public class StoreServiceTests
     public async Task Delete_ReturnsError_WhenFails()
     {
         // Arrange
-        _commands.Setup(c => c.Delete(_storeId, _userId, CancellationToken.None)).ReturnsAsync(Some<Error>(new StoreNotFoundError(_storeId)));
+        _commands
+            .Setup(c => c.Delete(_storeId, _userId, CancellationToken.None))
+            .ReturnsAsync(Some<Error>(new StoreNotFoundError(_storeId)));
 
         // Act
         var result = await _service.Delete(_storeId);

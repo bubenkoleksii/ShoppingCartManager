@@ -9,8 +9,8 @@ using ShoppingCartManager.Application.User.Abstractions;
 namespace ShoppingCartManager.Application.Tests.Statistics;
 
 using Category = Domain.Entities.Category;
-using Store = Domain.Entities.Store;
 using Product = Domain.Entities.Product;
+using Store = Domain.Entities.Store;
 
 public class StatisticsServiceTests
 {
@@ -39,33 +39,64 @@ public class StatisticsServiceTests
 
         var products = new List<Product>
         {
-            new() { Id = Guid.NewGuid(), Name = "Milk", Price = 30, IsInCart = true, CategoryId = categoryId, StoreId = storeId, UserId = _userId }
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Milk",
+                Price = 30,
+                IsInCart = true,
+                CategoryId = categoryId,
+                StoreId = storeId,
+                UserId = _userId,
+            },
         };
 
         var categories = new List<Category>
         {
-            new() { Id = categoryId, Name = "Dairy", UserId = _userId }
+            new()
+            {
+                Id = categoryId,
+                Name = "Dairy",
+                UserId = _userId,
+            },
         };
 
         var stores = new List<Store>
         {
-            new() { Id = storeId, Name = "Supermarket", UserId = _userId }
+            new()
+            {
+                Id = storeId,
+                Name = "Supermarket",
+                UserId = _userId,
+            },
         };
 
-        _productQueries.Setup(p => p.GetStats(_userId, from, to, It.IsAny<CancellationToken>())).ReturnsAsync(products);
-        _categoryQueries.Setup(c => c.Get(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(categories);
-        _storeQueries.Setup(s => s.Get(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(stores);
+        _productQueries
+            .Setup(p => p.GetStats(_userId, from, to, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(products);
+        _categoryQueries
+            .Setup(c => c.Get(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(categories);
+        _storeQueries
+            .Setup(s => s.Get(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(stores);
 
         StatisticsResponse? cached = null;
-        _cacheProvider.Setup(c => c.GetOrAddAsync(
-            It.IsAny<string>(),
-            It.IsAny<Func<Task<StatisticsResponse>>>(),
-            It.IsAny<TimeSpan>()
-        )).Returns<string, Func<Task<StatisticsResponse>>, TimeSpan>(async (key, factory, ttl) =>
-        {
-            cached ??= await factory();
-            return cached;
-        });
+        _cacheProvider
+            .Setup(c =>
+                c.GetOrAddAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Func<Task<StatisticsResponse>>>(),
+                    It.IsAny<TimeSpan>()
+                )
+            )
+            .Returns<string, Func<Task<StatisticsResponse>>, TimeSpan>(
+                async (key, factory, ttl) =>
+                {
+                    cached ??= await factory();
+                    return cached;
+                }
+            );
 
         var service = new StatisticsService(
             _productQueries.Object,
@@ -73,7 +104,8 @@ public class StatisticsServiceTests
             _storeQueries.Object,
             _cacheProvider.Object,
             _userContext.Object,
-            _logger.Object);
+            _logger.Object
+        );
 
         // Act
         var result = await service.GetStatistics(from, to);
@@ -102,33 +134,64 @@ public class StatisticsServiceTests
 
         var products = new List<Product>
         {
-            new() { Id = Guid.NewGuid(), Name = "Milk", Price = 30, IsInCart = true, CategoryId = categoryId, StoreId = storeId, UserId = _userId }
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Milk",
+                Price = 30,
+                IsInCart = true,
+                CategoryId = categoryId,
+                StoreId = storeId,
+                UserId = _userId,
+            },
         };
 
         var categories = new List<Category>
         {
-            new() { Id = categoryId, Name = "Dairy", UserId = _userId }
+            new()
+            {
+                Id = categoryId,
+                Name = "Dairy",
+                UserId = _userId,
+            },
         };
 
         var stores = new List<Store>
         {
-            new() { Id = storeId, Name = "Supermarket", UserId = _userId }
+            new()
+            {
+                Id = storeId,
+                Name = "Supermarket",
+                UserId = _userId,
+            },
         };
 
-        _productQueries.Setup(p => p.GetStats(_userId, from, to, It.IsAny<CancellationToken>())).ReturnsAsync(products);
-        _categoryQueries.Setup(c => c.Get(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(categories);
-        _storeQueries.Setup(s => s.Get(_userId, It.IsAny<CancellationToken>())).ReturnsAsync(stores);
+        _productQueries
+            .Setup(p => p.GetStats(_userId, from, to, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(products);
+        _categoryQueries
+            .Setup(c => c.Get(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(categories);
+        _storeQueries
+            .Setup(s => s.Get(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(stores);
 
         StatisticsResponse? cached = null;
-        _cacheProvider.Setup(c => c.GetOrAddAsync(
-            It.IsAny<string>(),
-            It.IsAny<Func<Task<StatisticsResponse>>>(),
-            It.IsAny<TimeSpan>()
-        )).Returns<string, Func<Task<StatisticsResponse>>, TimeSpan>(async (key, factory, ttl) =>
-        {
-            cached ??= await factory();
-            return cached;
-        });
+        _cacheProvider
+            .Setup(c =>
+                c.GetOrAddAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Func<Task<StatisticsResponse>>>(),
+                    It.IsAny<TimeSpan>()
+                )
+            )
+            .Returns<string, Func<Task<StatisticsResponse>>, TimeSpan>(
+                async (key, factory, ttl) =>
+                {
+                    cached ??= await factory();
+                    return cached;
+                }
+            );
 
         var service = new StatisticsService(
             _productQueries.Object,
@@ -136,7 +199,8 @@ public class StatisticsServiceTests
             _storeQueries.Object,
             _cacheProvider.Object,
             _userContext.Object,
-            _logger.Object);
+            _logger.Object
+        );
 
         // Act
         var result1 = await service.GetStatistics(from, to);
@@ -146,7 +210,10 @@ public class StatisticsServiceTests
         Assert.True(result1.IsRight);
         Assert.True(result2.IsRight);
 
-        _productQueries.Verify(p => p.GetStats(_userId, from, to, It.IsAny<CancellationToken>()), Times.Once);
+        _productQueries.Verify(
+            p => p.GetStats(_userId, from, to, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
         _categoryQueries.Verify(c => c.Get(_userId, It.IsAny<CancellationToken>()), Times.Once);
         _storeQueries.Verify(s => s.Get(_userId, It.IsAny<CancellationToken>()), Times.Never);
         _cacheProvider.Verify(c => c.GetOrAddAsync(
@@ -169,7 +236,8 @@ public class StatisticsServiceTests
             _storeQueries.Object,
             _cacheProvider.Object,
             _userContext.Object,
-            _logger.Object);
+            _logger.Object
+        );
 
         // Act
         var result = await service.GetStatistics(from, to);
