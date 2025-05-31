@@ -19,7 +19,6 @@ jobs:
       SQL_DATABASE: ShoppingCartManagerDB
       SQL_USER: ${{ secrets.SQL_USER }}
       SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-      SQL_CONNECTION_STRING: "Server=${{ env.SQL_SERVER }},${{ env.SQL_PORT }};User Id=${{ env.SQL_USER }};Password=${{ env.SQL_PASSWORD }};Encrypt=false;TrustServerCertificate=true;"
 
     steps:
       - name: Checkout code
@@ -63,20 +62,21 @@ jobs:
 
       - name: Create SQL Server database if it doesn't exist
         run: |
-          echo 'using Microsoft.Data.SqlClient;' > CreateDatabaseApp.cs
-          echo 'class Program {' >> CreateDatabaseApp.cs
-          echo '    static void Main() {' >> CreateDatabaseApp.cs
-          echo "        var connectionString = \"${{ env.SQL_CONNECTION_STRING }}\";" >> CreateDatabaseApp.cs
-          echo '        using (var connection = new SqlConnection(connectionString)) {' >> CreateDatabaseApp.cs
-          echo "            connection.Open();" >> CreateDatabaseApp.cs
-          echo "            var command = new SqlCommand(\"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '${{ env.SQL_DATABASE }}') CREATE DATABASE [${{ env.SQL_DATABASE }}];\", connection);" >> CreateDatabaseApp.cs
-          echo '            command.ExecuteNonQuery();' >> CreateDatabaseApp.cs
-          echo '        }' >> CreateDatabaseApp.cs
-          echo '    }' >> CreateDatabaseApp.cs
-          echo '}' >> CreateDatabaseApp.cs
-
+          mkdir CreateDatabaseApp
+          cd CreateDatabaseApp
+          dotnet new console --force
           dotnet add package Microsoft.Data.SqlClient
-          dotnet build CreateDatabaseApp.csproj
+          echo 'using Microsoft.Data.SqlClient;' > Program.cs
+          echo 'class Program {' >> Program.cs
+          echo '    static void Main() {' >> Program.cs
+          echo '        var connectionString = "Server=localhost,1433;User Id='${SQL_USER}';Password='${SQL_PASSWORD}';Encrypt=false;TrustServerCertificate=true;";' >> Program.cs
+          echo '        using (var connection = new SqlConnection(connectionString)) {' >> Program.cs
+          echo '            connection.Open();' >> Program.cs
+          echo '            var command = new SqlCommand("IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '\'''"${SQL_DATABASE}"''\'') CREATE DATABASE ["'"${SQL_DATABASE}"'"];", connection);' >> Program.cs
+          echo '            command.ExecuteNonQuery();' >> Program.cs
+          echo '        }' >> Program.cs
+          echo '    }' >> Program.cs
+          echo '}' >> Program.cs
           dotnet run
 
       - name: Install FluentMigrator CLI
@@ -84,10 +84,11 @@ jobs:
 
       - name: Apply migrations
         run: |
+          CONNECTION_STRING="Server=${SQL_SERVER},${SQL_PORT};Database=${SQL_DATABASE};User Id=${SQL_USER};Password=${SQL_PASSWORD};Encrypt=false;TrustServerCertificate=true;"
           dotnet fm migrate \
             -a ./src/ShoppingCartManager.Persistence/bin/Release/net9.0/ShoppingCartManager.Persistence.dll \
             -p sqlserver \
-            -c "${{ env.SQL_CONNECTION_STRING }}"
+            -c "$CONNECTION_STRING"
 
       - name: Stop SQL Server
         if: always()
