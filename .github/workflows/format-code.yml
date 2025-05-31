@@ -9,8 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -20,11 +19,12 @@ jobs:
       - name: Install CSharpier tool
         run: |
           dotnet tool restore
-          dotnet tool install --global csharpier
+          dotnet tool install csharpier --global
 
       - name: Format code
         run: |
-          csharpier .
+          dotnet tool restore
+          dotnet csharpier format .
         working-directory: ${{ github.workspace }}
 
       - name: Commit and push formatted code
