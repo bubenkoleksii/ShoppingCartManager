@@ -23,7 +23,8 @@ jobs:
           dotnet tool install --global csharpier
 
       - name: Format code
-        run: dotnet csharpier .
+        run: |
+          csharpier .
         working-directory: ${{ github.workspace }}
 
       - name: Commit and push formatted code
