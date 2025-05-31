@@ -13,3 +13,7 @@ jobs:
   migrate:
     uses: ./.github/workflows/migrate.yml
     needs: unit-tests
+
+  format-code:
+    uses: ./.github/workflows/format-code.yml 
+    needs: [unit-tests, migrate] 
