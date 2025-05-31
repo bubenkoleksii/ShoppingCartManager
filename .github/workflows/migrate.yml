@@ -45,7 +45,7 @@ jobs:
 
       - name: Start SQL Server
         run: |
-          docker compose -f docker-compose.ci.yml up -d db-sqlserver
+          docker compose -f ${{ github.workspace }}/docker-compose.ci.yml up -d db-sqlserver
           echo "Waiting for SQL Server to be ready..."
           sleep 25
 
@@ -67,4 +67,4 @@ jobs:
 
       - name: Stop SQL Server
         if: always()
-        run: docker compose -f docker-compose.ci.yml down
+        run: docker compose -f ${{ github.workspace }}/docker-compose.ci.yml down
