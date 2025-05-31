@@ -16,19 +16,14 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Install CSharpier tool
-        run: |
-          dotnet tool restore
-          dotnet tool install csharpier --global
+      - name: Restore CSharpier tool
+        run: dotnet tool restore
 
       - name: Format code
-        run: |
-          dotnet tool restore
-          dotnet csharpier format .
-        working-directory: ${{ github.workspace }}
+        run: dotnet csharpier .
 
       - name: Commit and push formatted code
-        uses: stefanzweifel/git-auto-commit-action@v5.0.1
+        uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
         with:
           branch: ${{ github.head_ref || github.ref_name }}
           push_options: '--force-with-lease'
