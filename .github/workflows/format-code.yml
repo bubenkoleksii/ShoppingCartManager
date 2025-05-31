@@ -29,3 +29,4 @@ jobs:
           push_options: '--force-with-lease'
           commit_message: "[Bot] Apply CSharpier updates"
           commit_author: GitHub Actions Bot <actions@github.com>
+          token: ${{ secrets.GITHUB_TOKEN }}
