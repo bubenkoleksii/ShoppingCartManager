@@ -52,7 +52,7 @@ jobs:
       - name: Wait for SQL Server to be ready
         run: |
           for i in {1..30}; do
-            if docker exec db-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourStrong!Passw0rd" -Q "SELECT 1" -b -o /dev/null; then
+            if nc -z localhost 1433; then
               echo "SQL Server is ready!"
               break
             fi
