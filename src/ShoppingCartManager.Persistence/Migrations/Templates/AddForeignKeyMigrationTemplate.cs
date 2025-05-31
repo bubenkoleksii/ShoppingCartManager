@@ -18,6 +18,9 @@ public abstract class AddForeignKeyMigrationTemplate<TFromEntity, TToEntity> : M
 
     protected override void ApplyUp()
     {
+        if (IsSQLite())
+            return;
+
         Create.ForeignKey(ForeignKeyName)
             .FromTable(FromTable).ForeignColumn(ForeignColumn)
             .ToTable(ToTable).PrimaryColumn(ToPrimaryColumn)
@@ -27,6 +30,14 @@ public abstract class AddForeignKeyMigrationTemplate<TFromEntity, TToEntity> : M
 
     protected override void ApplyDown()
     {
+        if (IsSQLite())
+            return;
+
         Delete.ForeignKey(ForeignKeyName).OnTable(FromTable);
+    }
+
+    private bool IsSQLite()
+    {
+        return ConnectionString?.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) == true;
     }
 }
