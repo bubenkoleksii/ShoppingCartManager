@@ -71,7 +71,7 @@ jobs:
           echo '        var connectionString = "Server=localhost,1433;User Id=sa;Password=YourStrong!Passw0rd;";' >> Program.cs
           echo '        using (var connection = new SqlConnection(connectionString)) {' >> Program.cs
           echo '            connection.Open();' >> Program.cs
-          echo '            var command = new SqlCommand("IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = \'${SQL_DATABASE}\') CREATE DATABASE ${SQL_DATABASE};", connection);' >> Program.cs
+          echo "            var command = new SqlCommand(\"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '${{ env.SQL_DATABASE }}') CREATE DATABASE [${{ env.SQL_DATABASE }}];\", connection);" >> Program.cs
           echo '            command.ExecuteNonQuery();' >> Program.cs
           echo '        }' >> Program.cs
           echo '    }' >> Program.cs
