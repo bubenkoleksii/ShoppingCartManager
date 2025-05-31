@@ -49,14 +49,10 @@ jobs:
           docker compose -f docker-compose.ci.yml up -d db-sqlserver
           sleep 60
 
-      - name: Install sqlcmd in the container
-        run: |
-          docker exec db-sqlserver bash -c "apt-get update && apt-get install -y mssql-tools"
-
       - name: Wait for SQL Server to be ready
         run: |
           for i in {1..30}; do
-            if docker exec db-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourStrong!Passw0rd" -Q "SELECT 1" -b -o /dev/null; then
+            if nc -z localhost 1433; then
               echo "SQL Server is ready!"
               break
             fi
@@ -64,11 +60,23 @@ jobs:
             sleep 10
           done
 
-      - name: Create SQL Server database
+      - name: Create SQL Server database using .NET
         run: |
-          docker exec db-sqlserver /opt/mssql-tools/bin/sqlcmd \
-            -S ${{ env.SQL_SERVER }} -U ${{ env.SQL_USER }} -P ${{ env.SQL_PASSWORD }} \
-            -Q "IF DB_ID('${{ env.SQL_DATABASE }}') IS NULL CREATE DATABASE ${{ env.SQL_DATABASE }}"
+          dotnet new console -n CreateDatabaseApp
+          cd CreateDatabaseApp
+          dotnet add package Microsoft.Data.SqlClient
+          echo 'using Microsoft.Data.SqlClient;' > Program.cs
+          echo 'class Program {' >> Program.cs
+          echo '    static void Main() {' >> Program.cs
+          echo '        var connectionString = "Server=localhost,1433;User Id=sa;Password=YourStrong!Passw0rd;";' >> Program.cs
+          echo '        using (var connection = new SqlConnection(connectionString)) {' >> Program.cs
+          echo '            connection.Open();' >> Program.cs
+          echo '            var command = new SqlCommand("IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = \'${SQL_DATABASE}\') CREATE DATABASE ${SQL_DATABASE};", connection);' >> Program.cs
+          echo '            command.ExecuteNonQuery();' >> Program.cs
+          echo '        }' >> Program.cs
+          echo '    }' >> Program.cs
+          echo '}' >> Program.cs
+          dotnet run
 
       - name: Install FluentMigrator CLI
         run: dotnet tool install --global FluentMigrator.DotNet.Cli
