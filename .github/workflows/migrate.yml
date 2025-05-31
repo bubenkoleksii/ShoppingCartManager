@@ -47,8 +47,18 @@ jobs:
         run: |
           cd ${{ github.workspace }}
           docker compose -f docker-compose.ci.yml up -d db-sqlserver
-          echo "Waiting for SQL Server to be ready..."
-          sleep 25
+          sleep 60
+
+      - name: Wait for SQL Server to be ready
+        run: |
+          for i in {1..30}; do
+            if docker exec db-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "YourStrong!Passw0rd" -Q "SELECT 1" -b -o /dev/null; then
+              echo "SQL Server is ready!"
+              break
+            fi
+            echo "Waiting for SQL Server to be ready..."
+            sleep 10
+          done
 
       - name: Create SQL Server database
         run: |
