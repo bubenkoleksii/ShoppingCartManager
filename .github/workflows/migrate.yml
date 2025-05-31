@@ -1,26 +1,24 @@
-name: Apply Migrations
+name: Migrate
 
 on:
   workflow_call:
 
 jobs:
   migrate:
-    name: Run Migrations
+    name: Run DB Migrations
     runs-on: ubuntu-latest
 
-    services:
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2022-latest
-        env:
-          SA_PASSWORD: "YourStrong!Passw0rd"
-          ACCEPT_EULA: "Y"
-        ports:
-          - 1433:1433
-        options: >-
-          --health-cmd "exit 0"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_NOLOGO: true
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      APPDATA: "/tmp"
+      SQL_SERVER: localhost
+      SQL_PORT: 1433
+      SQL_USER: sa
+      SQL_PASSWORD: YourStrong!Passw0rd
+      SQL_DATABASE: ShoppingCartManagerDB
 
     steps:
       - name: Checkout code
@@ -31,18 +29,42 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-      - name: Build Persistence project
-        run: dotnet build ./src/ShoppingCartManager.Persistence/ShoppingCartManager.Persistence.csproj --configuration Release
+      - name: Restore dependencies
+        run: dotnet restore ./ShoppingCartManager.sln
+
+      - name: Build
+        run: dotnet build ./ShoppingCartManager.sln --configuration Release --no-restore
+
+      - name: Start SQL Server
+        run: |
+          docker compose -f docker-compose.ci.yml up -d db-sqlserver
+          echo "Waiting for SQL Server to be ready..."
+          sleep 25
+
+      - name: Create SQL Server database
+        run: |
+          docker exec db-sqlserver /opt/mssql-tools/bin/sqlcmd \
+            -S ${{ env.SQL_SERVER }} -U ${{ env.SQL_USER }} -P ${{ env.SQL_PASSWORD }} \
+            -Q "IF DB_ID('${{ env.SQL_DATABASE }}') IS NULL CREATE DATABASE ${{ env.SQL_DATABASE }}"
 
       - name: Install FluentMigrator CLI
-        run: dotnet tool install -g FluentMigrator.DotNet.Cli
+        run: dotnet tool install --global FluentMigrator.DotNet.Cli
 
-      - name: Run migrations
+      - name: Apply migrations
         run: |
           dotnet fm migrate \
             -a ./src/ShoppingCartManager.Persistence/bin/Release/net9.0/ShoppingCartManager.Persistence.dll \
             -p sqlserver \
-            -c "Server=localhost,1433;Database=ShoppingCartManagerDB;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true"
+            -c "Server=${{ env.SQL_SERVER }},${{ env.SQL_PORT }};Database=${{ env.SQL_DATABASE }};User Id=${{ env.SQL_USER }};Password=${{ env.SQL_PASSWORD }};TrustServerCertificate=true"
+
+      - name: Stop SQL Server
+        if: always()
+        run: docker compose -f docker-compose.ci.yml down
