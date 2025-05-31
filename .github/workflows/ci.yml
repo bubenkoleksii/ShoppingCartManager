@@ -15,5 +15,7 @@ jobs:
     needs: unit-tests
 
   format-code:
-    uses: ./.github/workflows/format-code.yml 
-    needs: [unit-tests, migrate] 
+    uses: ./.github/workflows/format-code.yml
+    needs: [unit-tests, migrate]
+    permissions:
+      contents: write
