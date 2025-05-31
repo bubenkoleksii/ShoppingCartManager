@@ -44,6 +44,9 @@ jobs:
         run: dotnet build ./ShoppingCartManager.sln --configuration Release --no-restore
 
       - name: Start SQL Server
+        env:
+          MSSQL_SA_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+          MSSQL_USER: ${{ secrets.SQL_USER }}
         run: |
           cd ${{ github.workspace }}
           docker compose -f docker-compose.ci.yml up -d db-sqlserver
@@ -69,10 +72,10 @@ jobs:
           echo 'using Microsoft.Data.SqlClient;' > Program.cs
           echo 'class Program {' >> Program.cs
           echo '    static void Main() {' >> Program.cs
-          echo '        var connectionString = "Server=localhost,1433;User Id='${SQL_USER}';Password='${SQL_PASSWORD}';Encrypt=false;TrustServerCertificate=true;";' >> Program.cs
+          echo "        var connectionString = \"Server=localhost,1433;User Id=${SQL_USER};Password=${SQL_PASSWORD};Encrypt=false;TrustServerCertificate=true;\";" >> Program.cs
           echo '        using (var connection = new SqlConnection(connectionString)) {' >> Program.cs
-          echo '            connection.Open();' >> Program.cs
-          echo '            var command = new SqlCommand("IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '\'''"${SQL_DATABASE}"''\'') CREATE DATABASE ["'"${SQL_DATABASE}"'"];", connection);' >> Program.cs
+          echo "            connection.Open();" >> Program.cs
+          echo "            var command = new SqlCommand(\"IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '${SQL_DATABASE}') CREATE DATABASE [${SQL_DATABASE}];\", connection);" >> Program.cs
           echo '            command.ExecuteNonQuery();' >> Program.cs
           echo '        }' >> Program.cs
           echo '    }' >> Program.cs

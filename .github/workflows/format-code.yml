@@ -1,0 +1,35 @@
+name: Format Code
+
+on:
+  workflow_call:
+
+jobs:
+  format-code:
+    name: Format code with CSharpier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install CSharpier tool
+        run: dotnet tool install --global csharpier
+
+      - name: Format code
+        run: |
+          dotnet tool restore
+          dotnet csharpier .
+        working-directory: ${{ github.workspace }}
+
+      - name: Commit and push formatted code
+        uses: stefanzweifel/git-auto-commit-action@v5.0.1
+        with:
+          branch: ${{ github.head_ref || github.ref_name }}
+          push_options: '--force-with-lease'
+          commit_message: "[Bot] Apply CSharpier updates"
+          commit_author: GitHub Actions Bot <actions@github.com>
