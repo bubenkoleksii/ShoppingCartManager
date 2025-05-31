@@ -23,7 +23,8 @@ public sealed class StatisticsService(
     public async Task<Either<Error, StatisticsResponse>> GetStatistics(
         DateTime from,
         DateTime to,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var userId = userContext.UserId;
 
@@ -41,27 +42,23 @@ public sealed class StatisticsService(
         {
             logger.LogInformation(
                 "Generating statistics for user {UserId} from {From} to {To}",
-                userId, from, to);
+                userId,
+                from,
+                to
+            );
 
-            var products = await productQueries.GetStats(
-                userId.Value, from, to, cancellationToken);
+            var products = await productQueries.GetStats(userId.Value, from, to, cancellationToken);
 
             var totalProducts = products.Count;
             var productsInCart = products.Count(p => p.IsInCart);
 
-            var categories = await categoryQueries.Get(
-                userId.Value, cancellationToken);
+            var categories = await categoryQueries.Get(userId.Value, cancellationToken);
 
-            var stores = await storeQueries.Get(
-                userId.Value, cancellationToken);
+            var stores = await storeQueries.Get(userId.Value, cancellationToken);
 
-            var categoryMap = categories.ToDictionary(
-                c => c.Id,
-                c => c.Name);
+            var categoryMap = categories.ToDictionary(c => c.Id, c => c.Name);
 
-            var storeMap = stores.ToDictionary(
-                s => s.Id,
-                s => s.Name);
+            var storeMap = stores.ToDictionary(s => s.Id, s => s.Name);
 
             var categoryBreakdown = products
                 .GroupBy(p => p.CategoryId!.Value)

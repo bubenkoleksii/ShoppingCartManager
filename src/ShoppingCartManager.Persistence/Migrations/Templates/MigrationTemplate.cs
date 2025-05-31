@@ -24,5 +24,6 @@ public abstract class MigrationTemplate : Migration
     protected abstract void ApplyDown();
 
     protected virtual bool ShouldRunUp() => Schema.Table(TableName).Exists();
+
     protected virtual bool ShouldRunDown() => Schema.Table(TableName).Exists();
 }

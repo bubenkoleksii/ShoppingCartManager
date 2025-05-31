@@ -10,7 +10,15 @@ public interface IProductCommands
 
     Task<Option<Error>> Delete(Guid productId, Guid userId, CancellationToken cancellationToken);
 
-    Task<Option<Error>> MarkAsInCart(Guid productId, Guid userId, CancellationToken cancellationToken);
+    Task<Option<Error>> MarkAsInCart(
+        Guid productId,
+        Guid userId,
+        CancellationToken cancellationToken
+    );
 
-    Task<Option<Error>> RemoveFromCart(Guid productId, Guid userId, CancellationToken cancellationToken);
+    Task<Option<Error>> RemoveFromCart(
+        Guid productId,
+        Guid userId,
+        CancellationToken cancellationToken
+    );
 }

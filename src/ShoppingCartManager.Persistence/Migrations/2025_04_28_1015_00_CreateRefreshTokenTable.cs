@@ -7,10 +7,21 @@ public sealed class CreateRefreshTokenTable : CreateTableMigrationTemplate
 
     protected override void AddCustomColumns(ICreateTableColumnOptionOrWithColumnSyntax table)
     {
-        table.WithColumn(nameof(RefreshToken.UserId)).AsGuid().NotNullable()
-            .WithColumn(nameof(RefreshToken.Token)).AsString(512).NotNullable()
-            .WithColumn(nameof(RefreshToken.ExpiresAt)).AsDateTime().NotNullable()
-            .WithColumn(nameof(RefreshToken.RevokedAt)).AsDateTime().Nullable()
-            .WithColumn(nameof(RefreshToken.ReplacedByToken)).AsString(512).Nullable();
+        table
+            .WithColumn(nameof(RefreshToken.UserId))
+            .AsGuid()
+            .NotNullable()
+            .WithColumn(nameof(RefreshToken.Token))
+            .AsString(512)
+            .NotNullable()
+            .WithColumn(nameof(RefreshToken.ExpiresAt))
+            .AsDateTime()
+            .NotNullable()
+            .WithColumn(nameof(RefreshToken.RevokedAt))
+            .AsDateTime()
+            .Nullable()
+            .WithColumn(nameof(RefreshToken.ReplacedByToken))
+            .AsString(512)
+            .Nullable();
     }
 }

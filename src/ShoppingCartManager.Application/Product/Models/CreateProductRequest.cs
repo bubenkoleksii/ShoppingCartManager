@@ -7,7 +7,6 @@ public sealed class CreateProductRequest
 
     public Guid? CategoryId { get; init; }
 
-
     [Range(0, double.MaxValue)]
     public decimal Price { get; init; }
 

@@ -17,7 +17,10 @@ public sealed class UserController(IUserService userService) : ControllerBase
     {
         var result = await userService.GetById(id, cancellationToken);
 
-        return result.Match(Right: user => Ok(new UserResponse(user)), ErrorActionResultHandler.Handle);
+        return result.Match(
+            Right: user => Ok(new UserResponse(user)),
+            ErrorActionResultHandler.Handle
+        );
     }
 
     [HttpGet(template: "email/{email}")]
@@ -27,7 +30,10 @@ public sealed class UserController(IUserService userService) : ControllerBase
     {
         var result = await userService.GetByEmail(email, cancellationToken);
 
-        return result.Match(Right: user => Ok(new UserResponse(user)), ErrorActionResultHandler.Handle);
+        return result.Match(
+            Right: user => Ok(new UserResponse(user)),
+            ErrorActionResultHandler.Handle
+        );
     }
 
     [Authorize]
@@ -55,7 +61,10 @@ public sealed class UserController(IUserService userService) : ControllerBase
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Update([FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(
+        [FromBody] UpdateUserRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var result = await userService.Update(request, cancellationToken);
 
@@ -74,9 +83,6 @@ public sealed class UserController(IUserService userService) : ControllerBase
     {
         var result = await userService.Delete(id, cancellationToken);
 
-        return result.Match(
-            None: NoContent,
-            Some: ErrorActionResultHandler.Handle
-        );
+        return result.Match(None: NoContent, Some: ErrorActionResultHandler.Handle);
     }
 }

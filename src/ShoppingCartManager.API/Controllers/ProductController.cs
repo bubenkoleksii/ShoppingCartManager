@@ -25,10 +25,7 @@ public sealed class ProductController(IProductService productService) : Controll
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetById(
-        Guid id,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         var result = await productService.GetById(id, cancellationToken);
 
@@ -65,10 +62,7 @@ public sealed class ProductController(IProductService productService) : Controll
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(
-        Guid id,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
         var result = await productService.Delete(id, cancellationToken);
 

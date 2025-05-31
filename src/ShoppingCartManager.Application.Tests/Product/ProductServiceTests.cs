@@ -21,7 +21,12 @@ public class ProductServiceTests
     public ProductServiceTests()
     {
         _userContext.Setup(u => u.UserId).Returns(_userId);
-        _service = new ProductService(_commands.Object, _queries.Object, _userContext.Object, _logger.Object);
+        _service = new ProductService(
+            _commands.Object,
+            _queries.Object,
+            _userContext.Object,
+            _logger.Object
+        );
     }
 
     [Fact]
@@ -42,7 +47,9 @@ public class ProductServiceTests
     public async Task GetById_ReturnsError_WhenProductNotFound()
     {
         // Arrange
-        _queries.Setup(q => q.GetById(_userId, _productId, CancellationToken.None)).ReturnsAsync(Option<Product>.None);
+        _queries
+            .Setup(q => q.GetById(_userId, _productId, CancellationToken.None))
+            .ReturnsAsync(Option<Product>.None);
 
         // Act
         var result = await _service.GetById(_productId);
@@ -86,7 +93,9 @@ public class ProductServiceTests
     public async Task Update_ReturnsError_WhenProductNotFound()
     {
         // Arrange
-        _queries.Setup(q => q.GetById(_userId, _productId, CancellationToken.None)).ReturnsAsync(Option<Product>.None);
+        _queries
+            .Setup(q => q.GetById(_userId, _productId, CancellationToken.None))
+            .ReturnsAsync(Option<Product>.None);
         var request = new UpdateProductRequest { Id = _productId, Name = "Updated" };
 
         // Act

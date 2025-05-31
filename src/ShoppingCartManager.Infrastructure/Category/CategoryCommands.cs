@@ -8,7 +8,10 @@ using Category = Domain.Entities.Category;
 
 public sealed class CategoryCommands(IDbConnection connection) : ICategoryCommands
 {
-    public async Task<Either<Error, Category>> Add(Category category, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, Category>> Add(
+        Category category,
+        CancellationToken cancellationToken = default
+    )
     {
         var model = new CategoryDbModel(category);
 
@@ -35,7 +38,10 @@ public sealed class CategoryCommands(IDbConnection connection) : ICategoryComman
         );
     }
 
-    public async Task<Either<Error, Category>> Update(Category category, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, Category>> Update(
+        Category category,
+        CancellationToken cancellationToken = default
+    )
     {
         var existingOption = await connection.GetSingleBy<CategoryDbModel>(
             CategoryDbModel.TableName,
@@ -71,7 +77,11 @@ public sealed class CategoryCommands(IDbConnection connection) : ICategoryComman
         );
     }
 
-    public async Task<Option<Error>> Delete(Guid id, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Option<Error>> Delete(
+        Guid id,
+        Guid userId,
+        CancellationToken cancellationToken = default
+    )
     {
         var existingOption = await connection.GetSingleBy<CategoryDbModel>(
             CategoryDbModel.TableName,
@@ -85,9 +95,7 @@ public sealed class CategoryCommands(IDbConnection connection) : ICategoryComman
         try
         {
             var deleted = await connection.DeleteById(CategoryDbModel.TableName, id);
-            return deleted
-                ? Option<Error>.None
-                : new CategoryDeleteFailed(userId, id);
+            return deleted ? Option<Error>.None : new CategoryDeleteFailed(userId, id);
         }
         catch
         {

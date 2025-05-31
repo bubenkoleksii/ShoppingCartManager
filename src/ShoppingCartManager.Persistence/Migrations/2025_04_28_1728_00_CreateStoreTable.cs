@@ -7,8 +7,15 @@ public sealed class CreateStoreTable : CreateTableMigrationTemplate
 
     protected override void AddCustomColumns(ICreateTableColumnOptionOrWithColumnSyntax table)
     {
-        table.WithColumn(nameof(Store.UserId)).AsGuid().NotNullable()
-            .WithColumn(nameof(Store.Name)).AsString(size: 150).NotNullable()
-            .WithColumn(nameof(Store.Color)).AsString(size: 30).Nullable();
+        table
+            .WithColumn(nameof(Store.UserId))
+            .AsGuid()
+            .NotNullable()
+            .WithColumn(nameof(Store.Name))
+            .AsString(size: 150)
+            .NotNullable()
+            .WithColumn(nameof(Store.Color))
+            .AsString(size: 30)
+            .Nullable();
     }
 }

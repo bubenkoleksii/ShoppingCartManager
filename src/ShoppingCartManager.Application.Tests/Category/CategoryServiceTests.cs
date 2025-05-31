@@ -20,7 +20,12 @@ public class CategoryServiceTests
     public CategoryServiceTests()
     {
         _userContext.Setup(u => u.UserId).Returns(_userId);
-        _service = new CategoryService(_queries.Object, _commands.Object, _userContext.Object, _logger.Object);
+        _service = new CategoryService(
+            _queries.Object,
+            _commands.Object,
+            _userContext.Object,
+            _logger.Object
+        );
     }
 
     [Fact]
@@ -54,7 +59,9 @@ public class CategoryServiceTests
     public async Task GetById_ReturnsError_WhenCategoryNotFound()
     {
         // Arrange
-        _queries.Setup(q => q.GetById(_userId, _categoryId, CancellationToken.None)).ReturnsAsync(Option<Domain.Entities.Category>.None);
+        _queries
+            .Setup(q => q.GetById(_userId, _categoryId, CancellationToken.None))
+            .ReturnsAsync(Option<Domain.Entities.Category>.None);
 
         // Act
         var result = await _service.GetById(_categoryId);
@@ -98,7 +105,9 @@ public class CategoryServiceTests
     public async Task Update_ReturnsError_WhenCategoryNotFound()
     {
         // Arrange
-        _queries.Setup(q => q.GetById(_userId, _categoryId, CancellationToken.None)).ReturnsAsync(Option<Domain.Entities.Category>.None);
+        _queries
+            .Setup(q => q.GetById(_userId, _categoryId, CancellationToken.None))
+            .ReturnsAsync(Option<Domain.Entities.Category>.None);
         var request = new UpdateCategoryRequest { Id = _categoryId, Name = "Updated" };
 
         // Act
@@ -127,7 +136,9 @@ public class CategoryServiceTests
     public async Task Delete_ReturnsNone_WhenDeletedSuccessfully()
     {
         // Arrange
-        _commands.Setup(c => c.Delete(_categoryId, _userId, CancellationToken.None)).ReturnsAsync(Option<Error>.None);
+        _commands
+            .Setup(c => c.Delete(_categoryId, _userId, CancellationToken.None))
+            .ReturnsAsync(Option<Error>.None);
 
         // Act
         var result = await _service.Delete(_categoryId);
@@ -141,7 +152,9 @@ public class CategoryServiceTests
     {
         // Arrange
         var expectedError = new CategoryNotFoundError(_categoryId);
-        _commands.Setup(c => c.Delete(_categoryId, _userId, CancellationToken.None)).ReturnsAsync(Some<Error>(expectedError));
+        _commands
+            .Setup(c => c.Delete(_categoryId, _userId, CancellationToken.None))
+            .ReturnsAsync(Some<Error>(expectedError));
 
         // Act
         var result = await _service.Delete(_categoryId);

@@ -11,8 +11,7 @@ public abstract class AddForeignKeyMigrationTemplate<TFromEntity, TToEntity> : M
     protected virtual Rule OnDeleteRule => Rule.None;
     protected virtual Rule OnUpdateRule => Rule.None;
 
-    protected virtual string ForeignKeyName =>
-        $"FK_{FromTable}_{ToTable}_{ForeignColumn}";
+    protected virtual string ForeignKeyName => $"FK_{FromTable}_{ToTable}_{ForeignColumn}";
 
     protected override string TableName => FromTable;
 
@@ -21,9 +20,12 @@ public abstract class AddForeignKeyMigrationTemplate<TFromEntity, TToEntity> : M
         if (IsSQLite())
             return;
 
-        Create.ForeignKey(ForeignKeyName)
-            .FromTable(FromTable).ForeignColumn(ForeignColumn)
-            .ToTable(ToTable).PrimaryColumn(ToPrimaryColumn)
+        Create
+            .ForeignKey(ForeignKeyName)
+            .FromTable(FromTable)
+            .ForeignColumn(ForeignColumn)
+            .ToTable(ToTable)
+            .PrimaryColumn(ToPrimaryColumn)
             .OnDelete(OnDeleteRule)
             .OnUpdate(OnUpdateRule);
     }
@@ -38,6 +40,7 @@ public abstract class AddForeignKeyMigrationTemplate<TFromEntity, TToEntity> : M
 
     private bool IsSQLite()
     {
-        return ConnectionString?.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) == true;
+        return ConnectionString?.Contains("Data Source=", StringComparison.OrdinalIgnoreCase)
+            == true;
     }
 }

@@ -8,6 +8,7 @@ public sealed record CategoryUpdateFailedError : ApiError
 
     public CategoryUpdateFailedError(Guid userId, Guid categoryId)
     {
-        ErrorMessage = $"Failed to update category with ID '{categoryId}' for user with ID '{userId}'";
+        ErrorMessage =
+            $"Failed to update category with ID '{categoryId}' for user with ID '{userId}'";
     }
 }

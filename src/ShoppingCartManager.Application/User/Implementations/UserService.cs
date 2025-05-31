@@ -13,13 +13,17 @@ public sealed class UserService(
     ILogger<UserService> logger
 ) : IUserService
 {
-    public async Task<Either<Error, User>> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, User>> GetById(
+        Guid id,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation("Fetching user by ID: {UserId}", id);
 
         var userOption = await userQueries.GetById(id, cancellationToken);
 
-        return userOption.ToEither<Error>(new UserNotFoundError(id))
+        return userOption
+            .ToEither<Error>(new UserNotFoundError(id))
             .Do(_ => logger.LogInformation("User with ID {UserId} found", id))
             .MapLeft(error =>
             {
@@ -28,13 +32,17 @@ public sealed class UserService(
             });
     }
 
-    public async Task<Either<Error, User>> GetByEmail(string email, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, User>> GetByEmail(
+        string email,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation("Fetching user by email: {Email}", email);
 
         var userOption = await userQueries.GetByEmail(email, cancellationToken);
 
-        return userOption.ToEither<Error>(new UserNotFoundError(email))
+        return userOption
+            .ToEither<Error>(new UserNotFoundError(email))
             .Do(_ => logger.LogInformation("User with email {Email} found", email))
             .MapLeft(error =>
             {
@@ -43,13 +51,20 @@ public sealed class UserService(
             });
     }
 
-    public async Task<Either<Error, User>> Update(UpdateUserRequest request, CancellationToken cancellationToken = default)
+    public async Task<Either<Error, User>> Update(
+        UpdateUserRequest request,
+        CancellationToken cancellationToken = default
+    )
     {
         logger.LogInformation("Updating user with ID {UserId}", request.Id);
 
         if (userContext.UserId is not { } currentUserId || currentUserId != request.Id)
         {
-            logger.LogWarning("Unauthorized update attempt by user {CurrentUserId} on user {TargetUserId}", userContext.UserId, request.Id);
+            logger.LogWarning(
+                "Unauthorized update attempt by user {CurrentUserId} on user {TargetUserId}",
+                userContext.UserId,
+                request.Id
+            );
             return new UserNotFoundError(request.Id);
         }
 
@@ -63,7 +78,7 @@ public sealed class UserService(
         var user = userResult.RightAsEnumerable().First();
         user.FullName = request.FullName;
         user.Email = request.Email;
-        
+
         var updateResult = await userCommands.Update(user, cancellationToken);
 
         return updateResult.Match<Either<Error, User>>(
@@ -74,9 +89,14 @@ public sealed class UserService(
             },
             Left: error =>
             {
-                logger.LogError("Failed to update user with ID {UserId}: {Error}", request.Id, error);
+                logger.LogError(
+                    "Failed to update user with ID {UserId}: {Error}",
+                    request.Id,
+                    error
+                );
                 return error;
-            });
+            }
+        );
     }
 
     public async Task<Option<Error>> Delete(Guid id, CancellationToken cancellationToken = default)
@@ -85,7 +105,11 @@ public sealed class UserService(
 
         if (userContext.UserId is not { } currentUserId || currentUserId != id)
         {
-            logger.LogWarning("Unauthorized delete attempt by user {CurrentUserId} on user {TargetUserId}", userContext.UserId, id);
+            logger.LogWarning(
+                "Unauthorized delete attempt by user {CurrentUserId} on user {TargetUserId}",
+                userContext.UserId,
+                id
+            );
             return new UserNotFoundError(id);
         }
 

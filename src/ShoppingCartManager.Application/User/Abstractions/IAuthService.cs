@@ -16,5 +16,6 @@ public interface IAuthService
 
     Task<Either<Error, AuthResult>> RefreshToken(
         string refreshToken,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

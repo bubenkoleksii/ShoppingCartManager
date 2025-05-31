@@ -7,8 +7,15 @@ public sealed class CreateCategoryTable : CreateTableMigrationTemplate
 
     protected override void AddCustomColumns(ICreateTableColumnOptionOrWithColumnSyntax table)
     {
-        table.WithColumn(nameof(Category.UserId)).AsGuid().NotNullable()
-            .WithColumn(nameof(Category.Name)).AsString(size: 128).NotNullable()
-            .WithColumn(nameof(Category.IconId)).AsInt32().Nullable();
+        table
+            .WithColumn(nameof(Category.UserId))
+            .AsGuid()
+            .NotNullable()
+            .WithColumn(nameof(Category.Name))
+            .AsString(size: 128)
+            .NotNullable()
+            .WithColumn(nameof(Category.IconId))
+            .AsInt32()
+            .Nullable();
     }
 }

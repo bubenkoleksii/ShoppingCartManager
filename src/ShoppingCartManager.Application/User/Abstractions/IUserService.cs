@@ -13,7 +13,10 @@ public interface IUserService
         CancellationToken cancellationToken = default
     );
 
-    Task<Either<Error, User>> Update(UpdateUserRequest request, CancellationToken cancellationToken = default);
+    Task<Either<Error, User>> Update(
+        UpdateUserRequest request,
+        CancellationToken cancellationToken = default
+    );
 
     Task<Option<Error>> Delete(Guid id, CancellationToken cancellationToken = default);
 }

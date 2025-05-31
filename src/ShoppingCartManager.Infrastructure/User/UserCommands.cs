@@ -74,14 +74,11 @@ public sealed class UserCommands(IDbConnection connection) : IUserCommands
         {
             var deleted = await connection.DeleteById(UserDbModel.TableName, id);
 
-            return deleted
-                ? Option<Error>.None
-                : new UserDeleteFailed(id);
+            return deleted ? Option<Error>.None : new UserDeleteFailed(id);
         }
         catch (Exception)
         {
             return new UserDeleteFailed(id);
         }
     }
-
 }

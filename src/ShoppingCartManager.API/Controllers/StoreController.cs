@@ -31,7 +31,10 @@ public sealed class StoreController(IStoreService storeService) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(StoreResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Create([FromBody] CreateStoreRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateStoreRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var result = await storeService.Create(request, cancellationToken);
         return result.Match(
@@ -43,7 +46,10 @@ public sealed class StoreController(IStoreService storeService) : ControllerBase
     [HttpPut]
     [ProducesResponseType(typeof(StoreResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Update([FromBody] UpdateStoreRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(
+        [FromBody] UpdateStoreRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var result = await storeService.Update(request, cancellationToken);
         return result.Match(
@@ -57,9 +63,6 @@ public sealed class StoreController(IStoreService storeService) : ControllerBase
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var result = await storeService.Delete(id, cancellationToken);
-        return result.Match(
-            None: NoContent,
-            Some: ErrorActionResultHandler.Handle
-        );
+        return result.Match(None: NoContent, Some: ErrorActionResultHandler.Handle);
     }
 }

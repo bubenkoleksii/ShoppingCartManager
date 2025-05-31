@@ -23,17 +23,24 @@ public class UserServiceTests
         {
             Id = _userId,
             FullName = "Test User",
-            Email = "test@example.com"
+            Email = "test@example.com",
         };
         _context.Setup(c => c.UserId).Returns(_userId);
-        _service = new UserService(_queries.Object, _commands.Object, _context.Object, _logger.Object);
+        _service = new UserService(
+            _queries.Object,
+            _commands.Object,
+            _context.Object,
+            _logger.Object
+        );
     }
 
     [Fact]
     public async Task GetById_ReturnsUser_WhenExists()
     {
         // Arrange
-        _queries.Setup(q => q.GetById(_userId, CancellationToken.None)).ReturnsAsync(Some(_testUser));
+        _queries
+            .Setup(q => q.GetById(_userId, CancellationToken.None))
+            .ReturnsAsync(Some(_testUser));
 
         // Act
         var result = await _service.GetById(_userId);
@@ -47,7 +54,9 @@ public class UserServiceTests
     public async Task GetById_ReturnsError_WhenNotFound()
     {
         // Arrange
-        _queries.Setup(q => q.GetById(_userId, CancellationToken.None)).ReturnsAsync(Option<User>.None);
+        _queries
+            .Setup(q => q.GetById(_userId, CancellationToken.None))
+            .ReturnsAsync(Option<User>.None);
 
         // Act
         var result = await _service.GetById(_userId);
@@ -61,7 +70,9 @@ public class UserServiceTests
     public async Task GetByEmail_ReturnsUser_WhenExists()
     {
         // Arrange
-        _queries.Setup(q => q.GetByEmail(_testUser.Email, CancellationToken.None)).ReturnsAsync(Some(_testUser));
+        _queries
+            .Setup(q => q.GetByEmail(_testUser.Email, CancellationToken.None))
+            .ReturnsAsync(Some(_testUser));
 
         // Act
         var result = await _service.GetByEmail(_testUser.Email);
@@ -75,7 +86,9 @@ public class UserServiceTests
     public async Task GetByEmail_ReturnsError_WhenNotFound()
     {
         // Arrange
-        _queries.Setup(q => q.GetByEmail(_testUser.Email, CancellationToken.None)).ReturnsAsync(Option<User>.None);
+        _queries
+            .Setup(q => q.GetByEmail(_testUser.Email, CancellationToken.None))
+            .ReturnsAsync(Option<User>.None);
 
         // Act
         var result = await _service.GetByEmail(_testUser.Email);
@@ -90,7 +103,12 @@ public class UserServiceTests
     {
         // Arrange
         _context.Setup(c => c.UserId).Returns(Guid.NewGuid());
-        var request = new UpdateUserRequest { Id = _userId, FullName = "New Name", Email = "new@example.com" };
+        var request = new UpdateUserRequest
+        {
+            Id = _userId,
+            FullName = "New Name",
+            Email = "new@example.com",
+        };
 
         // Act
         var result = await _service.Update(request);
@@ -104,8 +122,15 @@ public class UserServiceTests
     public async Task Update_ReturnsError_WhenUserNotFound()
     {
         // Arrange
-        var request = new UpdateUserRequest { Id = _userId, FullName = "New Name", Email = "new@example.com" };
-        _queries.Setup(q => q.GetById(_userId, CancellationToken.None)).ReturnsAsync(Option<User>.None);
+        var request = new UpdateUserRequest
+        {
+            Id = _userId,
+            FullName = "New Name",
+            Email = "new@example.com",
+        };
+        _queries
+            .Setup(q => q.GetById(_userId, CancellationToken.None))
+            .ReturnsAsync(Option<User>.None);
 
         // Act
         var result = await _service.Update(request);
@@ -119,16 +144,27 @@ public class UserServiceTests
     public async Task Update_ReturnsUpdatedUser_WhenSuccess()
     {
         // Arrange
-        var request = new UpdateUserRequest { Id = _userId, FullName = "Updated", Email = "updated@example.com" };
-        _queries.Setup(q => q.GetById(_userId, CancellationToken.None)).ReturnsAsync(Some(_testUser));
-        _commands.Setup(c => c.Update(It.IsAny<User>(), CancellationToken.None)).ReturnsAsync(Right<Error, User>(
-            new User
-            {
-                Id = _userId,
-                FullName = request.FullName,
-                Email = request.Email
-            })
-        );
+        var request = new UpdateUserRequest
+        {
+            Id = _userId,
+            FullName = "Updated",
+            Email = "updated@example.com",
+        };
+        _queries
+            .Setup(q => q.GetById(_userId, CancellationToken.None))
+            .ReturnsAsync(Some(_testUser));
+        _commands
+            .Setup(c => c.Update(It.IsAny<User>(), CancellationToken.None))
+            .ReturnsAsync(
+                Right<Error, User>(
+                    new User
+                    {
+                        Id = _userId,
+                        FullName = request.FullName,
+                        Email = request.Email,
+                    }
+                )
+            );
 
         // Act
         var result = await _service.Update(request);
@@ -156,7 +192,9 @@ public class UserServiceTests
     public async Task Delete_ReturnsNone_WhenSuccess()
     {
         // Arrange
-        _commands.Setup(c => c.Delete(_userId, CancellationToken.None)).ReturnsAsync(Option<Error>.None);
+        _commands
+            .Setup(c => c.Delete(_userId, CancellationToken.None))
+            .ReturnsAsync(Option<Error>.None);
 
         // Act
         var result = await _service.Delete(_userId);
@@ -170,7 +208,9 @@ public class UserServiceTests
     {
         // Arrange
         var expectedError = new UserNotFoundError(_userId);
-        _commands.Setup(c => c.Delete(_userId, CancellationToken.None)).ReturnsAsync(Some<Error>(expectedError));
+        _commands
+            .Setup(c => c.Delete(_userId, CancellationToken.None))
+            .ReturnsAsync(Some<Error>(expectedError));
 
         // Act
         var result = await _service.Delete(_userId);
