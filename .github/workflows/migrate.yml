@@ -1,0 +1,48 @@
+name: Apply Migrations
+
+on:
+  workflow_call:
+
+jobs:
+  migrate:
+    name: Run Migrations
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: "YourStrong!Passw0rd"
+          ACCEPT_EULA: "Y"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "exit 0"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build Persistence project
+        run: dotnet build ./src/ShoppingCartManager.Persistence/ShoppingCartManager.Persistence.csproj --configuration Release
+
+      - name: Install FluentMigrator CLI
+        run: dotnet tool install -g FluentMigrator.DotNet.Cli
+
+      - name: Run migrations
+        run: |
+          dotnet fm migrate \
+            -a ./src/ShoppingCartManager.Persistence/bin/Release/net9.0/ShoppingCartManager.Persistence.dll \
+            -p sqlserver \
+            -c "Server=localhost,1433;Database=ShoppingCartManagerDB;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true"
