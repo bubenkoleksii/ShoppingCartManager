@@ -24,4 +24,4 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test tests/ShoppingCartManager.Application.Tests/ShoppingCartManager.Application.Tests.csproj --configuration Release --no-build --verbosity normal
+        run: dotnet test ./src/ShoppingCartManager.Application.Tests/ShoppingCartManager.Application.Tests.csproj --configuration Release --no-build --verbosity normal
